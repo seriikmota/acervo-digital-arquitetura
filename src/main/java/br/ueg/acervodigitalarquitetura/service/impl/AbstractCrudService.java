@@ -34,6 +34,7 @@ public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODE
     }
 
     public DTOResponse create(DTORequest dtoCreate) {
+        validatePassword(dtoCreate);
         MODEL data = mapper.toModel(dtoCreate);
         prepareToCreate(data);
         validateMandatoryFields(data);
@@ -96,6 +97,8 @@ public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODE
     protected void validateMandatoryFields(MODEL data) {
         validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY));
     }
+
+    protected void validatePassword(DTORequest dtoCreate) {}
 
     protected abstract void prepareToCreate(MODEL data);
     protected abstract void prepareToUpdate(MODEL dataDB);
