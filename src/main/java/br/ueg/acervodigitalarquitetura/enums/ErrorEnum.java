@@ -4,12 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorEnum {
-    GENERAL(400, "Unknown Error!"),
-    NOT_FOUND(404, "Register not found!"),
-    PARAMETER_REQUIRED(400, "Mandatory parameter(s) not entered: "),
-    IMAGE_EXTENSION_INVALID(400, "Extension image is invalid!"),
-    USER_NAME_ALREADY_EXISTS(400, "First name and last name already exists!"),
-    USER_EMAIL_ALREADY_EXISTS(400, "Email already exists!");
+    GENERAL(400, "Erro desconhecido!"),
+    NOT_FOUND(404, "Registro não encontrado!"),
+    PARAMETER_REQUIRED(400, "Parâmetros obrigatório(s) não informados: "),
+    CONFIRM_PASSWORD_NOT_ENTIRED(400, "Confirmação de senha não informada!"),
+    PASSWORD_NOT_ENTIRED(400, "Senha não informada!"),
+    PASSWORD_DIFERENT(400, "Ambas senhas estão diferentes!"),
+    PASSWORD_INVALID(400, "Senha inválida!");
 
     private final Integer id;
     private final String message;
