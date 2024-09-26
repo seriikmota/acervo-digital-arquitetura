@@ -34,7 +34,7 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
     }
 
     public DTOResponse create(DTORequest dtoCreate) {
-        prepareToMap(dtoCreate);
+        prepareToMapCreate(dtoCreate);
         MODEL data = mapper.toModel(dtoCreate);
         prepareToCreate(data);
         validateMandatoryFields(data);
@@ -46,7 +46,7 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
     public DTOResponse update(TYPE_PK id, DTORequest dtoUpdate) {
         var dataDB = validateIdModelExistsAndGet(id);
 
-        prepareToMap(dtoUpdate);
+        prepareToMapUpdate(dtoUpdate);
         var dataUpdate = mapper.toModel(dtoUpdate);
 
         mapper.updateModelFromModel(dataDB, dataUpdate);
@@ -100,7 +100,8 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY));
     }
 
-    protected void prepareToMap(DTORequest dto) {}
+    protected void prepareToMapCreate(DTORequest dto) {}
+    protected void prepareToMapUpdate(DTORequest dto) {}
 
     protected abstract void prepareToCreate(MODEL data);
     protected abstract void prepareToUpdate(MODEL dataDB);
