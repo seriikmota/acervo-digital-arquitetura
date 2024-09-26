@@ -1,7 +1,7 @@
 package br.ueg.acervodigitalarquitetura.controller.impl;
 
-import br.ueg.acervodigitalarquitetura.controller.IAbstractCrudController;
-import br.ueg.acervodigitalarquitetura.service.IAbstractCrudService;
+import br.ueg.acervodigitalarquitetura.controller.IAbstractController;
+import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-public class AbstractCrudController<DTORequest, DTOResponse, DTOList, SERVICE extends IAbstractCrudService<DTORequest, DTOResponse, DTOList, TYPE_PK>, TYPE_PK>
-        implements IAbstractCrudController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
+public class AbstractController<DTORequest, DTOResponse, DTOList, SERVICE extends IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK>, TYPE_PK>
+        implements IAbstractController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
