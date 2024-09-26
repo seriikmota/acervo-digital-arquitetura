@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 
-public interface IAbstractCrudController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
+public interface IAbstractController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
     @Operation(description = "Endpoint to register a object", responses = {
             @ApiResponse(responseCode = "201", content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(hidden = true))),

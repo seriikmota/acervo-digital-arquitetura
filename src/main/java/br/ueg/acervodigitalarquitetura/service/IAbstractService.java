@@ -2,7 +2,7 @@ package br.ueg.acervodigitalarquitetura.service;
 
 import java.util.List;
 
-public interface IAbstractCrudService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
+public interface IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
     List<DTOList> listAll();
     DTOResponse create(DTORequest dtoCreate);
     DTOResponse update(TYPE_PK id, DTORequest dtoUpdate);
