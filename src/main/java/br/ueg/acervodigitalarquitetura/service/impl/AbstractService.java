@@ -1,21 +1,21 @@
 package br.ueg.acervodigitalarquitetura.service.impl;
 
-import br.ueg.acervodigitalarquitetura.domain.BaseModel;
-import br.ueg.acervodigitalarquitetura.mapper.BaseMapper;
+import br.ueg.acervodigitalarquitetura.domain.GenericModel;
+import br.ueg.acervodigitalarquitetura.mapper.GenericMapper;
 import br.ueg.acervodigitalarquitetura.enums.ValidationActionsEnum;
 import br.ueg.acervodigitalarquitetura.exception.DataException;
 import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
 import br.ueg.acervodigitalarquitetura.exception.ParameterRequiredException;
-import br.ueg.acervodigitalarquitetura.service.IAbstractCrudService;
+import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import br.ueg.acervodigitalarquitetura.validation.IValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.*;
 
-public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODEL extends BaseModel<TYPE_PK>, REPOSITORY extends JpaRepository<MODEL, TYPE_PK>,
-        MAPPER extends BaseMapper<DTORequest, DTOResponse, DTOList, MODEL, TYPE_PK>, TYPE_PK>
-        implements IAbstractCrudService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
+public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL extends GenericModel<TYPE_PK>, REPOSITORY extends JpaRepository<MODEL, TYPE_PK>,
+        MAPPER extends GenericMapper<DTORequest, DTOResponse, DTOList, MODEL, TYPE_PK>, TYPE_PK>
+        implements IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -34,7 +34,7 @@ public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODE
     }
 
     public DTOResponse create(DTORequest dtoCreate) {
-        validatePassword(dtoCreate);
+        prepareToMap(dtoCreate);
         MODEL data = mapper.toModel(dtoCreate);
         prepareToCreate(data);
         validateMandatoryFields(data);
@@ -45,6 +45,8 @@ public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODE
 
     public DTOResponse update(TYPE_PK id, DTORequest dtoUpdate) {
         var dataDB = validateIdModelExistsAndGet(id);
+
+        prepareToMap(dtoUpdate);
         var dataUpdate = mapper.toModel(dtoUpdate);
 
         mapper.updateModelFromModel(dataDB, dataUpdate);
@@ -98,7 +100,7 @@ public abstract class AbstractCrudService<DTORequest, DTOResponse, DTOList, MODE
         validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY));
     }
 
-    protected void validatePassword(DTORequest dtoCreate) {}
+    protected void prepareToMap(DTORequest dto) {}
 
     protected abstract void prepareToCreate(MODEL data);
     protected abstract void prepareToUpdate(MODEL dataDB);
