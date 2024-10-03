@@ -8,9 +8,13 @@ import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
 import br.ueg.acervodigitalarquitetura.exception.ParameterRequiredException;
 import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import br.ueg.acervodigitalarquitetura.validation.IValidations;
+import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL extends GenericModel<TYPE_PK>, REPOSITORY extends JpaRepository<MODEL, TYPE_PK>,
@@ -28,6 +32,8 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired(required = false)
     private List<IValidations<MODEL>> validations = new ArrayList<>();
+
+    private Class<TYPE_PK> entityClass;
 
     public List<DTOList> listAll() {
         return new ArrayList<>(mapper.toDtoList(repository.findAll()));
@@ -78,6 +84,25 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         } else {
             throw new DataException(ErrorEnum.NOT_FOUND);
         }
+    }
+
+    public Class<TYPE_PK> getEntityType() {
+        if(Objects.isNull(this.entityClass)){
+            Type[] actualTypeArgumentsList = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+            for (Type argument : actualTypeArgumentsList) {
+                for (AnnotatedType argumentInterface : (((Class<?>) argument).getAnnotatedInterfaces())) {
+                    if (argumentInterface.getType() instanceof ParameterizedType && ((ParameterizedType) argumentInterface.getType()).getRawType().equals(GenericModel.class)) {
+                        for (var annotation : ((Class<?>) argument).getDeclaredAnnotations()) {
+                            if (annotation.annotationType().equals(Entity.class)) {
+                                this.entityClass = ((Class<TYPE_PK>) argument);
+                                return this.entityClass;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return this.entityClass;
     }
 
     protected void validateBusinessLogicForInsert(MODEL data) {

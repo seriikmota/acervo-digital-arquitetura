@@ -6,7 +6,11 @@ import lombok.Getter;
 public enum ErrorEnum {
     GENERAL(400, "Erro desconhecido!"),
     NOT_FOUND(404, "Registro não encontrado!"),
-    PARAMETER_REQUIRED(400, "Parâmetros obrigatório(s) não informados: ");
+    PARAMETER_REQUIRED(400, "Parâmetros obrigatório(s) não informados: "),
+    LOGIN_INVALID(400, "Login e/ou senha inválido(s)!"),
+    USER_PASSWORD_NOT_MATCH(400, "Login e/ou senha incorreto(s)!"),
+    INACTIVE_USER(400, "Usuário inativo!"),
+    INVALID_TOKEN(400, "Token inválido!");
 
     private final Integer id;
     private final String message;
