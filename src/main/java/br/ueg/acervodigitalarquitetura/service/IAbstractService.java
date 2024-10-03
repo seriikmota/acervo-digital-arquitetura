@@ -8,4 +8,5 @@ public interface IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
     DTOResponse update(TYPE_PK id, DTORequest dtoUpdate);
     DTOResponse getById(TYPE_PK id);
     DTOResponse deleteById(TYPE_PK id);
+    Class<TYPE_PK> getEntityType();
 }
