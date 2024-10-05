@@ -1,7 +1,7 @@
 package br.ueg.acervodigitalarquitetura.security.impl;
 
 import br.ueg.acervodigitalarquitetura.dto.CredentialDTO;
-import br.ueg.acervodigitalarquitetura.exception.BusinessLogicException;
+import br.ueg.acervodigitalarquitetura.exception.BusinessException;
 import br.ueg.acervodigitalarquitetura.security.Credential;
 import br.ueg.acervodigitalarquitetura.security.IAuthenticationProvider;
 import br.ueg.acervodigitalarquitetura.service.impl.AuthService;
@@ -24,7 +24,7 @@ public class AuthenticationProvider implements IAuthenticationProvider {
 
         try {
             credentialDTO = authService.getInfoByToken(accessToken);
-        } catch (BusinessLogicException e) {
+        } catch (BusinessException e) {
             logger.error("Acesso negado.", e);
             throw e;
         }

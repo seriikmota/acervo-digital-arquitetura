@@ -1,13 +1,14 @@
 package br.ueg.acervodigitalarquitetura.security.impl;
 
 import br.ueg.acervodigitalarquitetura.config.Constants;
-import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
-import br.ueg.acervodigitalarquitetura.exception.BusinessLogicException;
+import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
+import br.ueg.acervodigitalarquitetura.exception.BusinessException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.Data;
@@ -105,9 +106,12 @@ public class TokenBuilder {
             JWTVerifier verifier = JWT.require(algorithm).withIssuer(keyToken.getIssuer()).build();
             DecodedJWT jwt = verifier.verify(token);
             return jwt.getClaims();
+        } catch (TokenExpiredException e) {
+            logger.warn("Token expirado!");
+            throw new BusinessException(ApiErrorEnum.EXPIRED_TOKEN);
         } catch (JWTVerificationException e) {
             logger.warn("Token Invalido!", e);
-            throw new BusinessLogicException(ErrorEnum.INVALID_TOKEN);
+            throw new BusinessException(ApiErrorEnum.INVALID_TOKEN);
         }
     }
 
