@@ -72,6 +72,7 @@ public class AuthService {
         registerCredentialInSecurityContext(credential);
         credential.setPassword(null);
 
+        userProviderService.recordLog(credential, Constants.ACTION_LOGIN);
         return credential;
     }
 
@@ -112,6 +113,7 @@ public class AuthService {
         credential.setRefreshExpiresIn(newRefreshToken.getExpiresIn());
         credential.setRefreshToken(newRefreshToken.getToken());
         credential.setRoles(roles);
+        userProviderService.recordLog(credential, Constants.ACTION_LOGIN_REFRESH);
         return credential;
     }
 
