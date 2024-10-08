@@ -3,8 +3,8 @@ package br.ueg.acervodigitalarquitetura.service.impl;
 import br.ueg.acervodigitalarquitetura.config.Constants;
 import br.ueg.acervodigitalarquitetura.dto.AuthDTO;
 import br.ueg.acervodigitalarquitetura.dto.CredentialDTO;
-import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
-import br.ueg.acervodigitalarquitetura.exception.BusinessLogicException;
+import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
+import br.ueg.acervodigitalarquitetura.exception.BusinessException;
 import br.ueg.acervodigitalarquitetura.security.impl.KeyToken;
 import br.ueg.acervodigitalarquitetura.security.impl.TokenBuilder;
 import br.ueg.acervodigitalarquitetura.service.IUserProviderService;
@@ -39,7 +39,7 @@ public class AuthService {
 
     public void validateLoginByPassword(AuthDTO authDTO, CredentialDTO credential) {
         if (!UserPasswordService.loginByPassword(authDTO, credential)) {
-            throw new BusinessLogicException(ErrorEnum.USER_PASSWORD_NOT_MATCH);
+            throw new BusinessException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
         }
     }
 
@@ -72,6 +72,7 @@ public class AuthService {
         registerCredentialInSecurityContext(credential);
         credential.setPassword(null);
 
+        userProviderService.recordLog(credential, Constants.ACTION_LOGIN);
         return credential;
     }
 
@@ -80,7 +81,7 @@ public class AuthService {
         TokenBuilder builder = new TokenBuilder(keyToken);
 
         if (!resolve.isTokenTypeRefresh())
-            throw new BusinessLogicException(ErrorEnum.INVALID_TOKEN);
+            throw new BusinessException(ApiErrorEnum.INVALID_TOKEN);
 
         CredentialDTO credential = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -112,13 +113,14 @@ public class AuthService {
         credential.setRefreshExpiresIn(newRefreshToken.getExpiresIn());
         credential.setRefreshToken(newRefreshToken.getToken());
         credential.setRoles(roles);
+        userProviderService.recordLog(credential, Constants.ACTION_LOGIN_REFRESH);
         return credential;
     }
 
     public CredentialDTO getInfoByToken(final String token) {
         AuthClaimResolve resolve = getClaimResolve(token);
 
-        if (!resolve.isTokenTypeAccess()) throw new BusinessLogicException(ErrorEnum.INVALID_TOKEN);
+        if (!resolve.isTokenTypeAccess()) throw new BusinessException(ApiErrorEnum.INVALID_TOKEN);
 
         CredentialDTO credentialDTO = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -135,16 +137,16 @@ public class AuthService {
 
     private void validateFieldsAuthDTO(final AuthDTO authDTO) {
         if (Strings.isEmpty(authDTO.getLogin()) || Strings.isEmpty(authDTO.getPassword())) {
-            throw new BusinessLogicException(ErrorEnum.LOGIN_INVALID);
+            throw new BusinessException(ApiErrorEnum.LOGIN_INVALID);
         }
     }
 
     private void validateCredential(CredentialDTO credential) {
         if (credential == null) {
-            throw new BusinessLogicException(ErrorEnum.USER_PASSWORD_NOT_MATCH);
+            throw new BusinessException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
         }
         if (!credential.isActiveState()) {
-            throw new BusinessLogicException(ErrorEnum.INACTIVE_USER);
+            throw new BusinessException(ApiErrorEnum.INACTIVE_USER);
         }
     }
 

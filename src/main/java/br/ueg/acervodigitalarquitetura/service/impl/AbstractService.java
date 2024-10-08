@@ -4,7 +4,7 @@ import br.ueg.acervodigitalarquitetura.domain.GenericModel;
 import br.ueg.acervodigitalarquitetura.mapper.GenericMapper;
 import br.ueg.acervodigitalarquitetura.enums.ValidationActionsEnum;
 import br.ueg.acervodigitalarquitetura.exception.DataException;
-import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
+import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
 import br.ueg.acervodigitalarquitetura.exception.ParameterRequiredException;
 import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import br.ueg.acervodigitalarquitetura.validation.IValidations;
@@ -82,7 +82,7 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         if (byId.isPresent()) {
             return byId.get();
         } else {
-            throw new DataException(ErrorEnum.NOT_FOUND);
+            throw new DataException(ApiErrorEnum.NOT_FOUND);
         }
     }
 

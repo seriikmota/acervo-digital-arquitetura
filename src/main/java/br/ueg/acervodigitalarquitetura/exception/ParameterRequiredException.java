@@ -1,13 +1,13 @@
 package br.ueg.acervodigitalarquitetura.exception;
 
-import br.ueg.acervodigitalarquitetura.enums.ErrorEnum;
+import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
 import lombok.Getter;
 
 @Getter
 public class ParameterRequiredException extends RuntimeException {
-    private final ErrorEnum error;
+    private final ApiErrorEnum error;
     public ParameterRequiredException(String message){
-        super(ErrorEnum.PARAMETER_REQUIRED.getMessage() + message);
-        this.error = ErrorEnum.PARAMETER_REQUIRED;
+        super(ApiErrorEnum.PARAMETER_REQUIRED.getMessage() + message);
+        this.error = ApiErrorEnum.PARAMETER_REQUIRED;
     }
 }
