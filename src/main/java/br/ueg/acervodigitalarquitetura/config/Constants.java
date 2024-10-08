@@ -14,5 +14,9 @@ public final class Constants {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String HEADER_AUTHORIZATION_BEARER = "Bearer ";
 
+    public static final String ACTION_LOGIN = "logou";
+    public static final String ACTION_LOGIN_REFRESH = "atualizou";
+    public static final String ACTION_LOGOUT = "deslogou";
+
     private Constants() {}
 }
