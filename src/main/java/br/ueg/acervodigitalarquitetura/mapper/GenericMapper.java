@@ -11,10 +11,11 @@ public interface GenericMapper<DTORequest, DTOResponse, DTOList, MODEL extends G
     MODEL toModel(DTORequest dto);
     DTOResponse toDTO(MODEL model);
 
-
     @Named(value = "toDTOList")
-    List<DTOList> toDtoList(List<MODEL> modelList);
+    DTOList toDTOList(MODEL model);
 
     @IterableMapping(qualifiedByName = "toDTOList")
+    List<DTOList> toDtoList(List<MODEL> modelList);
+
     void updateModelFromModel(@MappingTarget MODEL entity, MODEL updateEntity);
 }
