@@ -33,6 +33,7 @@ public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse,
         for (MultipartFile image : files) {
             FileDTO imageDTO = FileDTO.builder()
                     .file(image.getBytes())
+                    .contentType(image.getContentType())
                     .build();
             listImageDTO.add(imageDTO);
         }

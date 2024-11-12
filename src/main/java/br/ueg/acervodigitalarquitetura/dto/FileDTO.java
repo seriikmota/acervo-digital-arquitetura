@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class FileDTO {
     private Long id;
+    private String contentType;
     private String fileName;
     private byte[] file;
 }
