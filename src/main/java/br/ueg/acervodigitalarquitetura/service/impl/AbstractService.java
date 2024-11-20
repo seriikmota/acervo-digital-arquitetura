@@ -1,16 +1,16 @@
 package br.ueg.acervodigitalarquitetura.service.impl;
 
 import br.ueg.acervodigitalarquitetura.domain.GenericModel;
+import br.ueg.acervodigitalarquitetura.exception.*;
 import br.ueg.acervodigitalarquitetura.mapper.GenericMapper;
 import br.ueg.acervodigitalarquitetura.enums.ValidationActionsEnum;
-import br.ueg.acervodigitalarquitetura.exception.DataException;
 import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
-import br.ueg.acervodigitalarquitetura.exception.ParameterRequiredException;
 import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import br.ueg.acervodigitalarquitetura.validation.IValidations;
 import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
@@ -40,26 +40,38 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
     }
 
     public DTOResponse create(DTORequest dtoCreate) {
+        List<Message> messagesToThrow = new ArrayList<>();
+
         prepareToMapCreate(dtoCreate);
+        validateToMapCreate(dtoCreate, messagesToThrow);
         MODEL data = mapper.toModel(dtoCreate);
+
         prepareToCreate(data);
-        validateMandatoryFields(data);
-        validateBusinessLogic(data);
-        validateBusinessLogicForInsert(data);
+
+        validateMandatoryFields(data, messagesToThrow);
+        validateBusinessLogic(data, messagesToThrow);
+        validateBusinessLogicForInsert(data, messagesToThrow);
+
+        throwMessages(messagesToThrow);
         return mapper.toDTO(repository.save(data));
     }
 
     public DTOResponse update(TYPE_PK id, DTORequest dtoUpdate) {
+        List<Message> messagesToThrow = new ArrayList<>();
         var dataDB = validateIdModelExistsAndGet(id);
 
         prepareToMapUpdate(dtoUpdate);
+        validateToMapUpdate(dtoUpdate, messagesToThrow);
         var dataUpdate = mapper.toModel(dtoUpdate);
 
         mapper.updateModelFromModel(dataDB, dataUpdate);
         prepareToUpdate(dataDB);
-        validateMandatoryFields(dataDB);
-        validateBusinessLogic(dataDB);
-        validateBusinessLogicForUpdate(dataDB);
+
+        validateMandatoryFields(dataDB, messagesToThrow);
+        validateBusinessLogic(dataDB, messagesToThrow);
+        validateBusinessLogicForUpdate(dataDB, messagesToThrow);
+
+        throwMessages(messagesToThrow);
         return mapper.toDTO(repository.save(dataDB));
     }
 
@@ -68,10 +80,16 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
     }
 
     public DTOResponse deleteById(TYPE_PK id){
+        List<Message> messagesToThrow = new ArrayList<>();
+
         MODEL dataToRemove = this.validateIdModelExistsAndGet(id);
-        validateBusinessLogicForDelete(dataToRemove);
-        this.repository.delete(dataToRemove);
+
+        validateBusinessLogicForDelete(dataToRemove, messagesToThrow);
+
+        throwMessages(messagesToThrow);
+
         prepareToDelete(dataToRemove);
+        this.repository.delete(dataToRemove);
         return mapper.toDTO(dataToRemove);
     }
 
@@ -82,7 +100,16 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         if (byId.isPresent()) {
             return byId.get();
         } else {
-            throw new DataException(ApiErrorEnum.NOT_FOUND);
+            throw new DataException(ApiErrorEnum.NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public void throwMessages(List<Message> messagesToThrow) {
+        if (!messagesToThrow.isEmpty()) {
+            MessageResponse messageResponse = new MessageResponse();
+            messageResponse.setMessages(messagesToThrow);
+            messageResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            throw new BusinessException(messageResponse);
         }
     }
 
@@ -105,28 +132,30 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         return this.entityClass;
     }
 
-    protected void validateBusinessLogicForInsert(MODEL data) {
-        validations.forEach(v -> v.validate(data, ValidationActionsEnum.CREATE));
+    protected void validateBusinessLogicForInsert(MODEL data, List<Message> messagesToThrow) {
+        validations.forEach(v -> v.validate(data, ValidationActionsEnum.CREATE, messagesToThrow));
     }
 
-    protected void validateBusinessLogicForUpdate(MODEL data) {
-        validations.forEach(v -> v.validate(data, ValidationActionsEnum.UPDATE));
+    protected void validateBusinessLogicForUpdate(MODEL data, List<Message> messagesToThrow) {
+        validations.forEach(v -> v.validate(data, ValidationActionsEnum.UPDATE, messagesToThrow));
     }
 
-    protected void validateBusinessLogicForDelete(MODEL data) {
-        validations.forEach(v -> v.validate(data, ValidationActionsEnum.DELETE));
+    protected void validateBusinessLogicForDelete(MODEL data, List<Message> messagesToThrow) {
+        validations.forEach(v -> v.validate(data, ValidationActionsEnum.DELETE, messagesToThrow));
     }
 
-    protected void validateBusinessLogic(MODEL data) {
-        validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL));
+    protected void validateBusinessLogic(MODEL data, List<Message> messagesToThrow) {
+        validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL, messagesToThrow));
     }
 
-    protected void validateMandatoryFields(MODEL data) {
-        validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY));
+    protected void validateMandatoryFields(MODEL data, List<Message> messagesToThrow) {
+        validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY, messagesToThrow));
     }
 
     protected void prepareToMapCreate(DTORequest dto) {}
+    protected void validateToMapCreate(DTORequest dto, List<Message> messagesToThrow) {}
     protected void prepareToMapUpdate(DTORequest dto) {}
+    protected void validateToMapUpdate(DTORequest dto, List<Message> messagesToThrow) {}
 
     protected abstract void prepareToCreate(MODEL data);
     protected abstract void prepareToUpdate(MODEL dataDB);

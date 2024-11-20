@@ -1,18 +1,41 @@
 package br.ueg.acervodigitalarquitetura.exception;
 
-import br.ueg.acervodigitalarquitetura.enums.ApiErrorEnum;
+import br.ueg.acervodigitalarquitetura.enums.MessageCode;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+import java.util.ArrayList;
 
 @Getter
 public class BusinessException extends RuntimeException {
-    private final ApiErrorEnum error;
+    private final MessageResponse messageResponse;
 
-    public BusinessException(String message){
-        super(message);
-        this.error = ApiErrorEnum.GENERAL;
+    public BusinessException(MessageResponse messageResponse){
+        super();
+        this.messageResponse = messageResponse;
     }
-    public BusinessException(ApiErrorEnum err){
-        super(err.getMessage());
-        this.error = err;
+
+    public BusinessException(MessageCode error){
+        super();
+        messageResponse = new MessageResponse();
+        messageResponse.setStatusCode(400);
+        messageResponse.setMessages(new ArrayList<>());
+        messageResponse.getMessages().add(new Message(error));
+    }
+
+    public BusinessException(MessageCode error, String... params){
+        super();
+        messageResponse = new MessageResponse();
+        messageResponse.setStatusCode(400);
+        messageResponse.setMessages(new ArrayList<>());
+        messageResponse.getMessages().add(new Message(error));
+    }
+
+    public BusinessException(MessageCode error, HttpStatus status){
+        super();
+        messageResponse = new MessageResponse();
+        messageResponse.setStatusCode(status.value());
+        messageResponse.setMessages(new ArrayList<>());
+        messageResponse.getMessages().add(new Message(error));
     }
 }
