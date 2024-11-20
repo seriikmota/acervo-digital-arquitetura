@@ -72,11 +72,6 @@ public abstract class ApiSecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(filterChainExceptionHandler, LogoutFilter.class)
-                .logout(
-                        logout -> logout.logoutUrl(urlAuthController.concat("/logout"))
-                                .addLogoutHandler(logoutHandler)
-                                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-                )
                 .cors(cors -> cors.configurationSource(request -> apiWebConfig.getCorsConfiguration()));
 
         configureHttpSecurity(http);
