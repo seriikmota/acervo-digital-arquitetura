@@ -10,7 +10,7 @@
 	</parent>
 	<packaging>jar</packaging>
 	<groupId>br.ueg</groupId>
-	<artifactId>generic-architecture</artifactId>
+	<artifactId>genericarchitecture</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>generic-architecture</name>
 	<description>Demo project for Spring Boot</description>
