@@ -10,9 +10,9 @@
 	</parent>
 	<packaging>jar</packaging>
 	<groupId>br.ueg</groupId>
-	<artifactId>acervodigitalarquitetura</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
-	<name>acervodigitalarquitetura</name>
+	<artifactId>generic-architecture</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+	<name>generic-architecture</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
