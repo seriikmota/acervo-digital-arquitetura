@@ -2,7 +2,7 @@ package br.ueg.genericarchitecture.security.impl;
 
 import br.ueg.genericarchitecture.config.Constants;
 import br.ueg.genericarchitecture.enums.ApiErrorEnum;
-import br.ueg.genericarchitecture.exception.BusinessException;
+import br.ueg.genericarchitecture.exception.SecurityException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
@@ -108,10 +108,10 @@ public class TokenBuilder {
             return jwt.getClaims();
         } catch (TokenExpiredException e) {
             logger.warn("Token expirado!");
-            throw new BusinessException(ApiErrorEnum.EXPIRED_TOKEN);
+            throw new SecurityException(ApiErrorEnum.EXPIRED_TOKEN);
         } catch (JWTVerificationException e) {
             logger.warn("Token Invalido!", e);
-            throw new BusinessException(ApiErrorEnum.INVALID_TOKEN);
+            throw new SecurityException(ApiErrorEnum.INVALID_TOKEN);
         }
     }
 
