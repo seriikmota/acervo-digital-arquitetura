@@ -3,13 +3,13 @@ package br.ueg.acervodigitalarquitetura.controller.impl;
 import br.ueg.acervodigitalarquitetura.controller.IAbstractCrudController;
 import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 public class AbstractCrudController<DTORequest, DTOResponse, DTOList, SERVICE extends IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK>, TYPE_PK>
         implements IAbstractCrudController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
@@ -44,8 +44,8 @@ public class AbstractCrudController<DTORequest, DTOResponse, DTOList, SERVICE ex
 
     @GetMapping
     @PreAuthorize("hasRole(#root.this.getRoleName('LISTALL'))")
-    public ResponseEntity<List<DTOList>> listAll(){
-        List<DTOList> listDTO = service.listAll();
+    public ResponseEntity<Page<DTOList>> listAll(Pageable pageable){
+        Page<DTOList> listDTO = service.listAll(pageable);
         return ResponseEntity.ok(listDTO);
     }
 

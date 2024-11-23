@@ -9,6 +9,8 @@ import br.ueg.acervodigitalarquitetura.service.IAbstractService;
 import br.ueg.acervodigitalarquitetura.validation.IValidations;
 import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 
@@ -35,8 +37,8 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
     private Class<TYPE_PK> entityClass;
 
-    public List<DTOList> listAll() {
-        return new ArrayList<>(mapper.toDtoList(repository.findAll()));
+    public Page<DTOList> listAll(Pageable pageable) {
+        return repository.findAll(pageable).map(obj -> mapper.toDTOList(obj));
     }
 
     public DTOResponse create(DTORequest dtoCreate) {
