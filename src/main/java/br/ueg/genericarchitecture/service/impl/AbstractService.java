@@ -5,6 +5,7 @@ import br.ueg.genericarchitecture.exception.*;
 import br.ueg.genericarchitecture.mapper.GenericMapper;
 import br.ueg.genericarchitecture.enums.ValidationActionsEnum;
 import br.ueg.genericarchitecture.enums.ApiErrorEnum;
+import br.ueg.genericarchitecture.reflection.ApiReflectionUtils;
 import br.ueg.genericarchitecture.service.IAbstractService;
 import br.ueg.genericarchitecture.validation.IValidations;
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ import java.util.*;
 
 public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL extends GenericModel<TYPE_PK>, REPOSITORY extends JpaRepository<MODEL, TYPE_PK>,
         MAPPER extends GenericMapper<DTORequest, DTOResponse, DTOList, MODEL, TYPE_PK>, TYPE_PK>
-        implements IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
+        implements IAbstractService<DTORequest, MODEL, TYPE_PK> {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -37,28 +38,39 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
     private Class<TYPE_PK> entityClass;
 
-    public Page<DTOList> listAll(Pageable pageable) {
-        return repository.findAll(pageable).map(obj -> mapper.toDTOList(obj));
+    public List<MODEL> listAll() {
+        return repository.findAll();
     }
 
-    public DTOResponse create(DTORequest dtoCreate) {
+    public Page<MODEL> listAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public MODEL createFromDTO(DTORequest dtoCreate) {
         List<Message> messagesToThrow = new ArrayList<>();
 
         prepareToMapCreate(dtoCreate);
         validateToMapCreate(dtoCreate, messagesToThrow);
+        validateMandatoryFieldsDTO(dtoCreate, messagesToThrow);
         MODEL data = mapper.toModel(dtoCreate);
 
-        prepareToCreate(data);
-
-        validateMandatoryFields(data, messagesToThrow);
-        validateBusinessLogic(data, messagesToThrow);
-        validateBusinessLogicForInsert(data, messagesToThrow);
-
         throwMessages(messagesToThrow);
-        return mapper.toDTO(repository.save(data));
+        return this.create(data);
     }
 
-    public DTOResponse update(TYPE_PK id, DTORequest dtoUpdate) {
+    public MODEL create(MODEL dataCreate) {
+        List<Message> messagesToThrow = new ArrayList<>();
+        prepareToCreate(dataCreate);
+
+        validateMandatoryFields(dataCreate, messagesToThrow);
+        validateBusinessLogic(dataCreate, messagesToThrow);
+        validateBusinessLogicForInsert(dataCreate, messagesToThrow);
+
+        throwMessages(messagesToThrow);
+        return repository.save(dataCreate);
+    }
+
+    public MODEL updateFromDTO(TYPE_PK id, DTORequest dtoUpdate) {
         List<Message> messagesToThrow = new ArrayList<>();
         var dataDB = validateIdModelExistsAndGet(id);
 
@@ -67,21 +79,29 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         var dataUpdate = mapper.toModel(dtoUpdate);
 
         mapper.updateModelFromModel(dataDB, dataUpdate);
-        prepareToUpdate(dataDB);
-
-        validateMandatoryFields(dataDB, messagesToThrow);
-        validateBusinessLogic(dataDB, messagesToThrow);
-        validateBusinessLogicForUpdate(dataDB, messagesToThrow);
 
         throwMessages(messagesToThrow);
-        return mapper.toDTO(repository.save(dataDB));
+        return repository.save(dataDB);
     }
 
-    public DTOResponse getById(TYPE_PK id){
-        return mapper.toDTO(this.validateIdModelExistsAndGet(id));
+    public MODEL update(TYPE_PK id, MODEL dataUpdate) {
+        List<Message> messagesToThrow = new ArrayList<>();
+
+        prepareToUpdate(dataUpdate);
+
+        validateMandatoryFields(dataUpdate, messagesToThrow);
+        validateBusinessLogic(dataUpdate, messagesToThrow);
+        validateBusinessLogicForUpdate(dataUpdate, messagesToThrow);
+
+        throwMessages(messagesToThrow);
+        return repository.save(dataUpdate);
     }
 
-    public DTOResponse deleteById(TYPE_PK id){
+    public MODEL getById(TYPE_PK id){
+        return this.validateIdModelExistsAndGet(id);
+    }
+
+    public MODEL deleteById(TYPE_PK id){
         List<Message> messagesToThrow = new ArrayList<>();
 
         MODEL dataToRemove = this.validateIdModelExistsAndGet(id);
@@ -92,7 +112,7 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
         prepareToDelete(dataToRemove);
         this.repository.delete(dataToRemove);
-        return mapper.toDTO(dataToRemove);
+        return dataToRemove;
     }
 
     public MODEL validateIdModelExistsAndGet(TYPE_PK id){
@@ -152,6 +172,17 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
     protected void validateMandatoryFields(MODEL data, List<Message> messagesToThrow) {
         validations.forEach(v -> v.validate(data, ValidationActionsEnum.GENERAL_MANDATORY, messagesToThrow));
+    }
+
+    private void validateMandatoryFieldsDTO(DTORequest dtoCreate, List<Message> messagesToThrow) {
+        List<String> fieldsInvalid = new ArrayList<>();
+        ApiReflectionUtils.validateMandatoryFields(dtoCreate, fieldsInvalid);
+
+        if (!fieldsInvalid.isEmpty()) {
+            for (String field : fieldsInvalid) {
+                messagesToThrow.add(new Message(ApiErrorEnum.MANDATORY_FIELD, field));
+            }
+        }
     }
 
     protected void prepareToMapCreate(DTORequest dto) {}

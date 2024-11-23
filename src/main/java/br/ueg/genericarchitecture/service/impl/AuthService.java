@@ -4,7 +4,7 @@ import br.ueg.genericarchitecture.config.Constants;
 import br.ueg.genericarchitecture.dto.AuthDTO;
 import br.ueg.genericarchitecture.dto.CredentialDTO;
 import br.ueg.genericarchitecture.enums.ApiErrorEnum;
-import br.ueg.genericarchitecture.exception.BusinessException;
+import br.ueg.genericarchitecture.exception.SecurityException;
 import br.ueg.genericarchitecture.security.impl.KeyToken;
 import br.ueg.genericarchitecture.security.impl.TokenBuilder;
 import br.ueg.genericarchitecture.service.IUserProviderService;
@@ -40,7 +40,7 @@ public class AuthService {
 
     public void validateLoginByPassword(AuthDTO authDTO, CredentialDTO credential) {
         if (!UserPasswordService.loginByPassword(authDTO, credential)) {
-            throw new BusinessException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
+            throw new SecurityException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
         }
     }
 
@@ -82,7 +82,7 @@ public class AuthService {
         TokenBuilder builder = new TokenBuilder(keyToken);
 
         if (!resolve.isTokenTypeRefresh())
-            throw new BusinessException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.FORBIDDEN);
+            throw new SecurityException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
 
         CredentialDTO credential = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -127,7 +127,7 @@ public class AuthService {
     public CredentialDTO getInfoByToken(final String token) {
         AuthClaimResolve resolve = getClaimResolve(token);
 
-        if (!resolve.isTokenTypeAccess()) throw new BusinessException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.FORBIDDEN);
+        if (!resolve.isTokenTypeAccess()) throw new SecurityException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
 
         CredentialDTO credentialDTO = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -144,16 +144,16 @@ public class AuthService {
 
     private void validateFieldsAuthDTO(final AuthDTO authDTO) {
         if (Strings.isEmpty(authDTO.getLogin()) || Strings.isEmpty(authDTO.getPassword())) {
-            throw new BusinessException(ApiErrorEnum.LOGIN_INVALID);
+            throw new SecurityException(ApiErrorEnum.LOGIN_INVALID);
         }
     }
 
     private void validateCredential(CredentialDTO credential) {
         if (credential == null) {
-            throw new BusinessException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
+            throw new SecurityException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
         }
         if (!credential.isActiveState()) {
-            throw new BusinessException(ApiErrorEnum.INACTIVE_USER);
+            throw new SecurityException(ApiErrorEnum.INACTIVE_USER);
         }
     }
 

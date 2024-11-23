@@ -11,7 +11,9 @@ public enum ApiErrorEnum implements MessageCode {
     USER_PASSWORD_NOT_MATCH("MEA005", MessageType.ERROR),
     INACTIVE_USER("MEA006", MessageType.ERROR),
     INVALID_TOKEN("MEA007", MessageType.ERROR),
-    EXPIRED_TOKEN("MEA008", MessageType.ERROR);
+    EXPIRED_TOKEN("MEA008", MessageType.ERROR),
+    MANDATORY_FIELD("MEA009", MessageType.ERROR),
+    ACCESS_DENIED("MEA010", MessageType.ERROR);
 
     private final String code;
     private final MessageType type;

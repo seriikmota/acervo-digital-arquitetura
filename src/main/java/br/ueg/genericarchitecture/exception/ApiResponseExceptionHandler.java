@@ -1,11 +1,13 @@
 package br.ueg.genericarchitecture.exception;
 
+import br.ueg.genericarchitecture.enums.ApiErrorEnum;
 import br.ueg.genericarchitecture.enums.MessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -15,6 +17,20 @@ public abstract class ApiResponseExceptionHandler extends ResponseEntityExceptio
 
     @Autowired
     private MessageSource messageSource;
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<MessageResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex){
+        MessageResponse messageResponse =  mountMessageResponse(HttpStatus.FORBIDDEN, ApiErrorEnum.ACCESS_DENIED);
+
+        return ResponseEntity.status(messageResponse.getStatusCode()).body(messageResponse);
+    }
+
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<MessageResponse> handleSecurityException(SecurityException ex){
+        mountMessages(ex.getMessageResponse());
+
+        return ResponseEntity.status(ex.getMessageResponse().getStatusCode()).body(ex.getMessageResponse());
+    }
 
     @ExceptionHandler(DataException.class)
     public ResponseEntity<MessageResponse> handleDataException(DataException ex){

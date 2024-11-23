@@ -1,8 +1,10 @@
 package br.ueg.genericarchitecture.controller.impl;
 
 import br.ueg.genericarchitecture.controller.IAbstractCrudFileController;
+import br.ueg.genericarchitecture.domain.GenericModel;
 import br.ueg.genericarchitecture.dto.DTOFile;
 import br.ueg.genericarchitecture.dto.FileDTO;
+import br.ueg.genericarchitecture.mapper.GenericMapper;
 import br.ueg.genericarchitecture.service.IAbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,13 +20,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse, DTOList, SERVICE
-        extends IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK>, TYPE_PK>
+public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse, DTOList, MODEL extends GenericModel<TYPE_PK>, SERVICE
+        extends IAbstractService<DTORequest, MODEL, TYPE_PK>, MAPPER extends GenericMapper<DTORequest, DTOResponse, DTOList, MODEL, TYPE_PK>, TYPE_PK>
         implements IAbstractCrudFileController<DTORequest, DTOResponse, DTOList, TYPE_PK> {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     protected SERVICE service;
+
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
+    protected MAPPER mapper;
 
     @PostMapping
     @Transactional
@@ -39,7 +45,7 @@ public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse,
             listImageDTO.add(imageDTO);
         }
         dto.setFiles(listImageDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDTO(service.createFromDTO(dto)));
 
     }
 
@@ -58,7 +64,7 @@ public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse,
         }
         dto.setFiles(listImageDTO);
 
-        DTOResponse modelSaved = service.update(id, dto);
+        DTOResponse modelSaved = mapper.toDTO(service.updateFromDTO(id, dto));
         return ResponseEntity.ok(modelSaved);
     }
 
@@ -66,21 +72,21 @@ public class AbstractCrudFileController<DTORequest extends DTOFile, DTOResponse,
     @Transactional
     @PreAuthorize(value = "hasRole(#root.this.getRoleName('DELETE'))")
     public ResponseEntity<DTOResponse> delete(@PathVariable TYPE_PK id){
-        DTOResponse deleteDTO = service.deleteById(id);
+        DTOResponse deleteDTO = mapper.toDTO(service.deleteById(id));
         return ResponseEntity.ok(deleteDTO);
     }
 
     @GetMapping
     @PreAuthorize("hasRole(#root.this.getRoleName('LISTALL'))")
     public ResponseEntity<Page<DTOList>> listAll(Pageable pageable){
-        Page<DTOList> listDTO = service.listAll(pageable);
+        Page<DTOList> listDTO = service.listAll(pageable).map(obj -> mapper.toDTOList(obj));
         return ResponseEntity.ok(listDTO);
     }
 
     @GetMapping(path = "/{id}")
     @PreAuthorize(value = "hasRole(#root.this.getRoleName('READ'))")
     public ResponseEntity<DTOResponse> getById(@PathVariable TYPE_PK id){
-        DTOResponse dtoResult = service.getById(id);
+        DTOResponse dtoResult = mapper.toDTO(service.getById(id));
         return ResponseEntity.ok(dtoResult);
     }
 
