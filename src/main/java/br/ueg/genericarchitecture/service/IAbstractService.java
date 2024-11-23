@@ -1,9 +1,10 @@
 package br.ueg.genericarchitecture.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface IAbstractService<DTORequest, DTOResponse, DTOList, TYPE_PK> {
-    List<DTOList> listAll();
+    Page<DTOList> listAll(Pageable pageable);
     DTOResponse create(DTORequest dtoCreate);
     DTOResponse update(TYPE_PK id, DTORequest dtoUpdate);
     DTOResponse getById(TYPE_PK id);
