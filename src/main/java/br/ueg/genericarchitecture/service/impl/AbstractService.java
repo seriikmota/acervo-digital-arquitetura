@@ -72,16 +72,15 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
     public MODEL updateFromDTO(TYPE_PK id, DTORequest dtoUpdate) {
         List<Message> messagesToThrow = new ArrayList<>();
-        var dataDB = validateIdModelExistsAndGet(id);
 
         prepareToMapUpdate(dtoUpdate);
         validateToMapUpdate(dtoUpdate, messagesToThrow);
-        var dataUpdate = mapper.toModel(dtoUpdate);
-
-        mapper.updateModelFromModel(dataDB, dataUpdate);
+        validateMandatoryFieldsDTO(dtoUpdate, messagesToThrow);
 
         throwMessages(messagesToThrow);
-        return repository.save(dataDB);
+
+        MODEL dataUpdate = mapper.toModel(dtoUpdate);
+        return this.update(id, dataUpdate);
     }
 
     public MODEL update(TYPE_PK id, MODEL dataUpdate) {
