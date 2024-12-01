@@ -32,6 +32,9 @@ public class ApiReflectionUtils {
             else if (valueField instanceof Collection<?>) {
                 isValid = !((Collection<?>) valueField).isEmpty();
             }
+            else if (!field.getType().isPrimitive() && !field.getType().getName().startsWith("java.lang") && !field.getType().getName().startsWith("java.time") && !field.getType().isEnum()) {
+                validateMandatoryFields(valueField, namesOfInvalidFields);
+            }
 
             if (!isValid) {
                 namesOfInvalidFields.add(getNameMandatoryField(field));
