@@ -85,6 +85,7 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
 
     public MODEL update(TYPE_PK id, MODEL dataUpdate) {
         List<Message> messagesToThrow = new ArrayList<>();
+        var dataDB = validateIdModelExistsAndGet(id);
 
         prepareToUpdate(dataUpdate);
 
@@ -93,7 +94,9 @@ public abstract class AbstractService<DTORequest, DTOResponse, DTOList, MODEL ex
         validateBusinessLogicForUpdate(dataUpdate, messagesToThrow);
 
         throwMessages(messagesToThrow);
-        return repository.save(dataUpdate);
+
+        mapper.updateModelFromModel(dataDB, dataUpdate);
+        return repository.save(dataDB);
     }
 
     public MODEL getById(TYPE_PK id){
