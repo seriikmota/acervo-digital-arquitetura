@@ -28,7 +28,7 @@ public class BusinessException extends RuntimeException {
         messageResponse = new MessageResponse();
         messageResponse.setStatusCode(400);
         messageResponse.setMessages(new ArrayList<>());
-        messageResponse.getMessages().add(new Message(error));
+        messageResponse.getMessages().add(new Message(error, params));
     }
 
     public BusinessException(MessageCode error, HttpStatus status){

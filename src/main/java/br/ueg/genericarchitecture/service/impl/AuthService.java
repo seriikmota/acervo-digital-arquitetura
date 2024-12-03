@@ -12,7 +12,6 @@ import com.auth0.jwt.interfaces.Claim;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -82,7 +81,7 @@ public class AuthService {
         TokenBuilder builder = new TokenBuilder(keyToken);
 
         if (!resolve.isTokenTypeRefresh())
-            throw new SecurityException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
+            throw new SecurityException(ApiErrorEnum.INVALID_TOKEN);
 
         CredentialDTO credential = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -119,15 +118,17 @@ public class AuthService {
     }
 
     public void logout(final String token) {
-        CredentialDTO credential = getInfoByToken(token);
-        userProviderService.recordLog(credential, Constants.ACTION_LOGOUT);
+        try {
+            CredentialDTO credential = getInfoByToken(token);
+            userProviderService.recordLog(credential, Constants.ACTION_LOGOUT);
+        } catch (Exception ignored) {}
         SecurityContextHolder.clearContext();
     }
 
     public CredentialDTO getInfoByToken(final String token) {
         AuthClaimResolve resolve = getClaimResolve(token);
 
-        if (!resolve.isTokenTypeAccess()) throw new SecurityException(ApiErrorEnum.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
+        if (!resolve.isTokenTypeAccess()) throw new SecurityException(ApiErrorEnum.INVALID_TOKEN);
 
         CredentialDTO credentialDTO = userProviderService.getCredentialByLogin(resolve.getLogin());
 
@@ -153,7 +154,7 @@ public class AuthService {
             throw new SecurityException(ApiErrorEnum.USER_PASSWORD_NOT_MATCH);
         }
         if (!credential.isActiveState()) {
-            throw new SecurityException(ApiErrorEnum.INACTIVE_USER);
+            throw new SecurityException(ApiErrorEnum.INACTIVE_USER, credential.getLogin());
         }
     }
 
