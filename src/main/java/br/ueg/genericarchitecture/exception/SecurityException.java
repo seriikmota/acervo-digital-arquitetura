@@ -18,7 +18,7 @@ public class SecurityException extends RuntimeException {
     public SecurityException(MessageCode error){
         super();
         messageResponse = new MessageResponse();
-        messageResponse.setStatusCode(400);
+        messageResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
         messageResponse.setMessages(new ArrayList<>());
         messageResponse.getMessages().add(new Message(error));
     }
@@ -26,9 +26,9 @@ public class SecurityException extends RuntimeException {
     public SecurityException(MessageCode error, String... params){
         super();
         messageResponse = new MessageResponse();
-        messageResponse.setStatusCode(400);
+        messageResponse.setStatusCode(HttpStatus.UNAUTHORIZED.value());
         messageResponse.setMessages(new ArrayList<>());
-        messageResponse.getMessages().add(new Message(error));
+        messageResponse.getMessages().add(new Message(error, params));
     }
 
     public SecurityException(MessageCode error, HttpStatus status){
